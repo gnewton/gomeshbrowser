@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	//"io/ioutil"
 	"log"
 	"strconv"
 
@@ -69,6 +69,7 @@ func (h *meshExpanderHandler) HandleEvent(ev gwu.Event) {
 						child := children[i]
 						log.Println("child:", child.Tree)
 						numChildren := countChildren(child, h.db, true)
+
 						linePanel := gwu.NewHorizontalPanel()
 						p.AddVSpace(5)
 						if numChildren > 0 {
@@ -124,7 +125,7 @@ func makeChildWord(n int64) string {
 }
 
 func main() {
-	log.SetOutput(ioutil.Discard)
+	//log.SetOutput(ioutil.Discard)
 	handlerMap = make(map[int64]*meshExpanderHandler)
 	db, err := dbOpen("mesh2016_sqlite3.db")
 	if err != nil {
@@ -204,10 +205,14 @@ func getTopLevel(db *gorm.DB) ([]int64, []*MeshTree, error) {
 }
 
 func getChildren(mt *MeshTree, db *gorm.DB) ([]*MeshTree, error) {
+	var mtChildren []*MeshTree
+	if mt.Depth == 12 {
+		return mtChildren, nil
+	}
 	q := getChildrenQuery(mt, false)
 
 	log.Println("**************************", mt.Depth, q)
-	var mtChildren []*MeshTree
+
 	db.Where(q).Find(&mtChildren)
 	var count int64
 	db.Model(&MeshTree{}).Where(q).Count(&count)
@@ -220,7 +225,10 @@ func getChildren(mt *MeshTree, db *gorm.DB) ([]*MeshTree, error) {
 }
 
 func countChildren(mt *MeshTree, db *gorm.DB, allChildren bool) int64 {
-	var count int64
+	if mt.Depth == 12 {
+		return 0
+	}
+	var count int64 = 0
 
 	q := getChildrenQuery(mt, allChildren)
 	db.Model(&MeshTree{}).Where(q).Count(&count)
@@ -242,10 +250,14 @@ func getLevel(level int, db *gorm.DB) ([]int64, []*MeshTree, error) {
 
 func whichDescendents(all bool, l1, l2 string) string {
 	if all {
-		return " AND " + l1 + " IS NOT NULL"
+		if l1 != "" {
+			return " AND " + l1 + " IS NOT NULL"
+		} else {
+			return ""
+		}
 	} else {
 		r := " AND " + l1 + " IS NOT NULL"
-		if l1 != "" {
+		if l1 != "" && l1 != T12 {
 			r += " AND " + l2 + " IS NULL"
 		}
 		return r
@@ -268,6 +280,8 @@ const T12 = "T12"
 
 func getChildrenQuery(mt *MeshTree, allDescendents bool) string {
 	q := ""
+
+	log.Println("Depth=" + strconv.Itoa(mt.Depth))
 
 	switch mt.Depth {
 	case 0:
