@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/icza/gowut/gwu"
@@ -63,7 +62,7 @@ func makeWin(db *gorm.DB) gwu.Window {
 	p.AddVSpace(5)
 
 	//numChildren, topLevel, err := getTopLevel(db)
-	_, topLevel, err := getTopLevel(db)
+	_, topLevel, err := getLevel(0, db)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,11 +74,14 @@ func makeWin(db *gorm.DB) gwu.Window {
 		numChildren := countChildren(t, db, true)
 
 		meh := makeHandler(t, db)
-		e := gwu.NewExpander()
-		e.SetHeader(gwu.NewLabel(findLabel(t) + " " + t.DescriptorName + " " + strconv.FormatInt(numChildren, 10) + " descendents"))
+		linePanel := gwu.NewHorizontalPanel()
+		newExpander := gwu.NewExpander()
+		newExpander.SetHeader(linePanel)
+		makeExpanderContents(linePanel, t, numChildren)
 
-		e.AddEHandler(meh, gwu.ETypeStateChange, gwu.ETypeWinLoad, gwu.ETypeStateChange, gwu.ETypeWinUnload, gwu.ETypeChange)
-		p.Add(e)
+		//e.SetHeader(gwu.NewLabel(findLabel(t) + " " + t.DescriptorName + " " + strconv.FormatInt(numChildren, 10) + " descendents"))
+		newExpander.AddEHandler(meh, gwu.ETypeStateChange)
+		p.Add(newExpander)
 		p.AddVSpace(15)
 	}
 	return win
