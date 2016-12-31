@@ -23,7 +23,7 @@ func (h *winHandler) HandleEvent(ev gwu.Event) {
 
 func (h sessHandler) Created(s gwu.Session) {
 	log.Println("New session:", s.Id())
-	s.SetTimeout(time.Second * 12)
+	s.SetTimeout(time.Minute * 60)
 	win := makeWin(h.db)
 
 	winHandler := new(winHandler)
@@ -49,19 +49,23 @@ func makeWin(db *gorm.DB) gwu.Window {
 	win.SetHAlign(gwu.HALeft)
 	win.SetCellPadding(2)
 
-	win.Add(gwu.NewSessMonitor())
-	reset := gwu.NewLink("Reset", "/guitest/main")
+	//win.Add(gwu.NewSessMonitor())
+	reset := gwu.NewLink(RESET_SESSION, "/guitest/main")
 	reset.SetTarget("_self")
 
-	win.Add(reset)
 	p := gwu.NewPanel()
 	win.Add(p)
-	l := gwu.NewLabel("PubMeSHicator")
-	l.Style().SetColor(gwu.ClrGreen)
-	p.Add(l)
-	p.AddVSpace(5)
 
-	//numChildren, topLevel, err := getTopLevel(db)
+	topPanel := gwu.NewHorizontalPanel()
+	p.Add(topPanel)
+
+	l := gwu.NewLabel(APP_TITLE)
+	l.Style().SetColor(gwu.ClrGreen)
+	topPanel.Add(l)
+	topPanel.AddHSpace(500)
+	topPanel.Add(reset)
+	p.AddVSpace(20)
+
 	_, topLevel, err := getLevel(0, db)
 	if err != nil {
 		log.Fatal(err)
@@ -79,7 +83,6 @@ func makeWin(db *gorm.DB) gwu.Window {
 		newExpander.SetHeader(linePanel)
 		makeExpanderContents(linePanel, t, numChildren)
 
-		//e.SetHeader(gwu.NewLabel(findLabel(t) + " " + t.DescriptorName + " " + strconv.FormatInt(numChildren, 10) + " descendents"))
 		newExpander.AddEHandler(meh, gwu.ETypeStateChange)
 		p.Add(newExpander)
 		p.AddVSpace(15)

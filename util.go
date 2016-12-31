@@ -176,8 +176,8 @@ func findLabel(t *MeshTree) string {
 
 func makeChildWord(n int64) string {
 	if n == 1 {
-		return "descendent"
+		return DESCENDANT
 	} else {
-		return "descendents"
+		return DESCENDANTS
 	}
 }
