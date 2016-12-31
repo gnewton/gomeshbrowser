@@ -18,13 +18,13 @@ func getChildren(mt *MeshTree, db *gorm.DB) ([]*MeshTree, error) {
 	log.Println("**************************", mt.Depth, q)
 
 	db.Where(q).Find(&mtChildren)
-	var count int64
-	db.Model(&MeshTree{}).Where(q).Count(&count)
-	log.Println(count)
-	q = getChildrenQuery(mt, true)
-	log.Println("******* all", q)
-	db.Model(&MeshTree{}).Where(q).Count(&count)
-	log.Println(count)
+	// var count int64
+	// db.Model(&MeshTree{}).Where(q).Count(&count)
+	// log.Println(count)
+	// q = getChildrenQuery(mt, true)
+	// log.Println("******* all", q)
+	// db.Model(&MeshTree{}).Where(q).Count(&count)
+	// log.Println(count)
 	return mtChildren, nil
 }
 
