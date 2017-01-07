@@ -9,19 +9,15 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-//These should be shared across sessions
-// Cache in hash
 type meshExpanderHandler struct {
 	meshTree *MeshTree
 	db       *gorm.DB
 }
 
-type linkClickHandler struct {
-}
-
 var handlerMap map[int64]*meshExpanderHandler
 
 func makeHandler(meshTree *MeshTree, db *gorm.DB) *meshExpanderHandler {
+	// Handlers created once & shared across sessions; perhaps should be cached instead (periodically removed)
 	if val, ok := handlerMap[meshTree.ID]; ok {
 		return val
 	}
@@ -31,10 +27,6 @@ func makeHandler(meshTree *MeshTree, db *gorm.DB) *meshExpanderHandler {
 	return newHandler
 }
 
-func (h *linkClickHandler) HandleEvent(ev gwu.Event) {
-
-}
-
 func (h *meshExpanderHandler) HandleEvent(ev gwu.Event) {
 	if hrr, ok := ev.(gwu.HasRequestResponse); ok {
 		req := hrr.Request()
@@ -42,8 +34,6 @@ func (h *meshExpanderHandler) HandleEvent(ev gwu.Event) {
 		log.Println(ev)
 
 	}
-
-	//log.Println(h.meshTree.Tree)
 	log.Println(ev)
 	if exp, isExpander := ev.Src().(gwu.Expander); isExpander { // We clicked on an expander
 		if exp.Expanded() { // We just expanded this expander
@@ -89,7 +79,7 @@ func populateNodeContent(exp gwu.Expander, meshTree *MeshTree, db *gorm.DB) {
 }
 
 func makeLeaf(linePanel gwu.Panel, child *MeshTree) {
-
+	// Should not be styled with <b>
 	l := gwu.NewHtml("<b>" + child.DescriptorName + "</b> [" + findLabel(child) + "]")
 	linePanel.Add(l)
 	linePanel.AddHSpace(24)
@@ -112,9 +102,6 @@ func makeExpanderContents(linePanel gwu.Panel, child *MeshTree, numChildren int6
 
 	link := gwu.NewLink(child.DescriptorUI, NIH_MESH_BASE_URL+child.DescriptorName)
 	link.SetToolTip(NIH_MESH_URL_TOOLTIP + child.DescriptorName)
-	link.SetAttr("foo", "bar")
 	linePanel.Add(link)
-	newLinkHandler := &linkClickHandler{}
-	link.AddEHandler(newLinkHandler, gwu.ETypeClick)
 
 }

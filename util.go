@@ -4,7 +4,7 @@ import (
 	//	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
-	"log"
+	//"log"
 	"strconv"
 )
 
@@ -15,7 +15,7 @@ func getChildren(mt *MeshTree, db *gorm.DB) ([]*MeshTree, error) {
 	}
 	q := getChildrenQuery(mt, false)
 
-	log.Println("**************************", mt.Depth, q)
+	//log.Println("**************************", mt.Depth, q)
 
 	db.Where(q).Find(&mtChildren)
 	// var count int64
