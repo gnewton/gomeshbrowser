@@ -9,3 +9,7 @@ const DESCENDANTS = "descendants"
 const RESET_SESSION = "Reset"
 
 const APP_TITLE = "PubMeSHicator"
+
+const DB_FILE = "mesh2016_sqlite3.db"
+
+const SESSION_LENGTH = 2

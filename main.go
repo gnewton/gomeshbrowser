@@ -8,8 +8,9 @@ import (
 
 func main() {
 	//log.SetOutput(ioutil.Discard)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	db, err := dbOpen("mesh2016_sqlite3.db")
+	db, err := dbOpen(DB_FILE)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -18,7 +19,7 @@ func main() {
 	sessionWindowMap = make(map[string]gwu.Window)
 
 	server := gwu.NewServer("guitest", "localhost:8081")
-	server.AddSessCreatorName("main", "Login Window")
+	server.AddSessCreatorName("main", APP_TITLE)
 	server.AddSHandler(sessHandler{db: db})
 	server.Start("") // Also opens windows list in browser
 }

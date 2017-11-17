@@ -31,8 +31,6 @@ func (h *meshExpanderHandler) HandleEvent(ev gwu.Event) {
 	if hrr, ok := ev.(gwu.HasRequestResponse); ok {
 		req := hrr.Request()
 		log.Println("Client addr:", req.RemoteAddr)
-		log.Println(ev)
-
 	}
 	log.Println(ev)
 	if exp, isExpander := ev.Src().(gwu.Expander); isExpander { // We clicked on an expander

@@ -22,9 +22,13 @@ func (h *winHandler) HandleEvent(ev gwu.Event) {
 }
 
 func (h sessHandler) Created(s gwu.Session) {
-	log.Println("New session:", s.Id())
-	s.SetTimeout(time.Minute * 60)
-	win := makeWin(h.db)
+	if hrr, ok := s.(gwu.HasRequestResponse); ok {
+		req := hrr.Request()
+		log.Println("Client addr:", req.RemoteAddr)
+	}
+
+	s.SetTimeout(time.Minute * (SESSION_LENGTH + 2))
+	win := makeWin(h.db, s)
 
 	winHandler := new(winHandler)
 	win.AddEHandler(winHandler, gwu.ETypeWinLoad, gwu.ETypeStateChange, gwu.ETypeWinUnload, gwu.ETypeChange)
@@ -37,12 +41,13 @@ func (h sessHandler) Removed(s gwu.Session) {
 
 	if win, ok := sessionWindowMap[s.Id()]; ok {
 		removed := s.RemoveWin(win)
+		delete(sessionWindowMap, s.Id())
 		log.Println("Removed window:", removed, win, "for session", s.Id())
 	}
 
 }
 
-func makeWin(db *gorm.DB) gwu.Window {
+func makeWin(db *gorm.DB, s gwu.Session) gwu.Window {
 	// Create and build a window
 	win := gwu.NewWindow("main", "Test GUI Window")
 	win.Style().SetFullWidth()
@@ -55,6 +60,7 @@ func makeWin(db *gorm.DB) gwu.Window {
 
 	p := gwu.NewPanel()
 	win.Add(p)
+	p2 := gwu.NewPanel()
 
 	topPanel := gwu.NewHorizontalPanel()
 	p.Add(topPanel)
@@ -63,15 +69,26 @@ func makeWin(db *gorm.DB) gwu.Window {
 	l.Style().SetColor(gwu.ClrGreen)
 	topPanel.Add(l)
 	topPanel.AddHSpace(500)
+
+	timm := gwu.NewTimer(time.Minute * SESSION_LENGTH)
+	win.Add(timm)
+
+	timm.AddEHandlerFunc(func(e gwu.Event) {
+		win.Remove(timm)
+		s.SetTimeout(0 * time.Minute)
+		e.MarkDirty(timm)
+		expiredSession := gwu.NewLink("Session expired", "/guitest/main")
+		expiredSession.SetTarget("_self")
+		win.Add(expiredSession)
+		e.MarkDirty(win)
+	}, gwu.ETypeStateChange)
+
+	log.Printf("%+v\n", timm)
 	topPanel.Add(reset)
-	p.AddVSpace(20)
 
 	_, topLevel, err := getLevel(0, db)
 	if err != nil {
 		log.Fatal(err)
-	}
-	for i, t := range topLevel {
-		log.Println(i, t)
 	}
 
 	for _, t := range topLevel {
@@ -84,8 +101,17 @@ func makeWin(db *gorm.DB) gwu.Window {
 		makeExpanderContents(linePanel, t, numChildren)
 
 		newExpander.AddEHandler(meh, gwu.ETypeStateChange)
-		p.Add(newExpander)
-		p.AddVSpace(15)
+		p2.Add(newExpander)
+		p2.AddVSpace(15)
 	}
+	p2.AddVSpace(75)
+	l = gwu.NewLabel("Glen Newton")
+	l.Style().SetColor(gwu.ClrGreen)
+	p2.Add(l)
+	p2.AddVSpace(15)
+	l = gwu.NewLink("github", "https://github.com/gnewton/gomeshbrowser")
+	l.Style().SetColor(gwu.ClrGreen)
+	p2.Add(l)
+	win.Add(p2)
 	return win
 }
