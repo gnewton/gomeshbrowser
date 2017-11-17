@@ -83,7 +83,6 @@ func makeWin(db *gorm.DB, s gwu.Session) gwu.Window {
 		e.MarkDirty(win)
 	}, gwu.ETypeStateChange)
 
-	log.Printf("%+v\n", timm)
 	topPanel.Add(reset)
 
 	_, topLevel, err := getLevel(0, db)

@@ -78,17 +78,21 @@ func populateNodeContent(exp gwu.Expander, meshTree *MeshTree, db *gorm.DB) {
 
 func makeLeaf(linePanel gwu.Panel, child *MeshTree) {
 	// Should not be styled with <b>
-	l := gwu.NewHtml("<b>" + child.DescriptorName + "</b> [" + findLabel(child) + "]")
-	linePanel.Add(l)
-	linePanel.AddHSpace(24)
-	link := gwu.NewLink(child.DescriptorUI, "https://meshb-prev.nlm.nih.gov/#/record/ui?name="+child.DescriptorName)
-	link.SetToolTip("NCBI MeSH Descriptor Record: " + child.DescriptorName)
+	// l := gwu.NewHtml("<b>" + child.DescriptorName + "</b> [" + findLabel(child) + "]")
+	// l.Style().SetColor(gwu.ClrBlue)
+	// linePanel.Add(l)
+	linePanel.AddHSpace(21)
+
+	link := gwu.NewLink(child.DescriptorName+" ["+findLabel(child)+"]  "+child.DescriptorUI, NIH_MESH_BASE_URL+child.DescriptorName)
+	link.SetToolTip(NIH_MESH_URL_TOOLTIP + child.DescriptorName)
+	link.Style().Set("text-decoration", "none")
 	linePanel.Add(link)
 }
 
 func makeExpanderContents(linePanel gwu.Panel, child *MeshTree, numChildren int64) {
 
 	titleLabel := gwu.NewHtml("<b>" + child.DescriptorName + "</b> [" + findLabel(child) + "]") // Fix with styles!
+	setTitleLabelStyles(titleLabel, numChildren)
 	linePanel.Add(titleLabel)
 	linePanel.AddHSpace(24)
 
@@ -100,6 +104,18 @@ func makeExpanderContents(linePanel gwu.Panel, child *MeshTree, numChildren int6
 
 	link := gwu.NewLink(child.DescriptorUI, NIH_MESH_BASE_URL+child.DescriptorName)
 	link.SetToolTip(NIH_MESH_URL_TOOLTIP + child.DescriptorName)
+	link.Style().Set("text-decoration", "none")
 	linePanel.Add(link)
 
+}
+
+func setTitleLabelStyles(l gwu.Html, numChildren int64) {
+
+	// if numChildren < 100 {
+	// 	return
+	// }
+	// if numChildren < 1000 {
+	// 	l.Style().SetFontSize("125%")
+	// }
+	// l.Style().SetFontSize("150%")
 }
