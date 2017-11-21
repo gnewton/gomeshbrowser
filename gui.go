@@ -74,13 +74,15 @@ func makeWin(db *gorm.DB, s gwu.Session) gwu.Window {
 	win.Add(timm)
 
 	timm.AddEHandlerFunc(func(e gwu.Event) {
+		log.Println("TIMER: removing session")
 		win.Remove(timm)
+		win.Remove(p)
+		win.Remove(p2)
 		s.SetTimeout(0 * time.Minute)
-		e.MarkDirty(timm)
 		expiredSession := gwu.NewLink("Session expired", "/guitest/main")
 		expiredSession.SetTarget("_self")
 		win.Add(expiredSession)
-		e.MarkDirty(win)
+		e.MarkDirty(win, p, p2, timm)
 	}, gwu.ETypeStateChange)
 
 	topPanel.Add(reset)
@@ -104,12 +106,13 @@ func makeWin(db *gorm.DB, s gwu.Session) gwu.Window {
 		p2.AddVSpace(15)
 	}
 	p2.AddVSpace(75)
-	l = gwu.NewLabel("Glen Newton")
-	l.Style().SetColor(gwu.ClrGreen)
+	l = gwu.NewLink("Glen Newton", "https://github.com/gnewton")
+	l.Style().SetColor(gwu.ClrGreen).Set("text-decoration", "none")
 	p2.Add(l)
 	p2.AddVSpace(15)
-	l = gwu.NewLink("github", "https://github.com/gnewton/gomeshbrowser")
-	l.Style().SetColor(gwu.ClrGreen)
+	l = gwu.NewLink("gomeshbrowser@github", "https://github.com/gnewton/gomeshbrowser")
+	l.Style().SetColor(gwu.ClrGreen).Set("text-decoration", "none")
+
 	p2.Add(l)
 	win.Add(p2)
 	return win

@@ -87,6 +87,9 @@ func makeLeaf(linePanel gwu.Panel, child *MeshTree) {
 	link.SetToolTip(NIH_MESH_URL_TOOLTIP + child.DescriptorName)
 	link.Style().Set("text-decoration", "none")
 	linePanel.Add(link)
+	offsiteArrow := gwu.NewHtml(" &nbsp; " + "&#x2197;")
+	offsiteArrow.SetToolTip("Opens New Window")
+	linePanel.Add(offsiteArrow)
 }
 
 func makeExpanderContents(linePanel gwu.Panel, child *MeshTree, numChildren int64) {
